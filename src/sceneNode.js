@@ -28,23 +28,27 @@ class SceneNode {
          * @Task1 : Implement the draw function for the SceneNode class.
          */
     
-        // Apply local transformation using this.trs
-        var localTransform = this.trs.getTransformationMatrix();
+
+        var localTransform = this.trs.getTransformationMatrix();//getting the local transformation matrix of the current node
     
-        // Combine parent transformations with the current node's local transformation
-        var transformedModel = MatrixMult(modelMatrix, localTransform);
-        var transformedModelView = MatrixMult(modelView, localTransform);
-        var transformedMvp = MatrixMult(mvp, localTransform);
+
+        var transformedModel = MatrixMult(modelMatrix, localTransform);//combining the parent's model matrix with the current node's local information, 
+        //it represents the final model matrix for this node, including the parent transformations
+
+        var transformedModelView = MatrixMult(modelView, localTransform);//this line combines the parent's modelViewMatrix with the current node's local transformation
+        var transformedMvp = MatrixMult(mvp, localTransform);//combining the parent's MVP matrix with the current node's local transformation
     
         // Correctly recalculate the normal matrix for lighting
-        var transformedNormals = inverse(transpose(transformedModel)); // Fix: Use model matrix
+        var transformedNormals = inverse(transpose(transformedModel)); // Fix: Use model matrix(here was problematic and the issue is fixed)
+        //this part ensures that the surface normals are transformed correctly
     
         // Draw the MeshDrawer with updated transformations
         if (this.meshDrawer) {
             this.meshDrawer.draw(transformedMvp, transformedModelView, transformedNormals, transformedModel);
+            // Passing the updated matrices to the meshDrawer to render the node with proper transformations.
         }
     
-        // Recursively propagate transformations to children nodes
+        // Recursively propagate transformations to children nodes, which is the backbone of sceneGraph
         for (var child of this.children) {
             child.draw(transformedMvp, transformedModelView, transformedNormals, transformedModel);
         }
